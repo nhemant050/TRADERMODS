@@ -1,0 +1,555 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TRADAR MODS - Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at bottom, #0d0d1a 0%, #000000 100%);
+      font-family: 'Orbitron', monospace;
+      color: #c2aaff;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .title {
+      font-size: 3em;
+      margin-bottom: 10px;
+      color: #bb86fc;
+      text-shadow: 0 0 20px #bb86fc, 0 0 40px #6200ea;
+      animation: glow 2s infinite ease-in-out, slideIn 1s ease-out;
+      display: flex;
+      justify-content: center;
+    }
+
+    .title span {
+      display: inline-block;
+      animation: letterPulse 1.5s infinite ease-in-out;
+      animation-delay: calc(var(--i) * 0.1s);
+    }
+
+    .clock {
+      font-size: 1.4em;
+      margin-bottom: 20px;
+      color: #d1c4e9;
+      text-shadow: 0 0 8px #9575cd;
+      animation: fadeIn 1.5s ease-in;
+    }
+
+    .admin-panel {
+      background: #1e1e2f;
+      padding: 20px;
+      border: 2px solid #bb86fc;
+      box-shadow: 0 0 30px #bb86fc;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 900px;
+      animation: slideIn 0.5s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .admin-panel h2 {
+      color: #bb86fc;
+      text-shadow: 0 0 10px #bb86fc;
+      margin-bottom: 20px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .btn {
+      position: relative;
+      background: #1e1e2f;
+      color: #bb86fc;
+      border: 2px solid #bb86fc;
+      padding: 15px 30px;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 20px #bb86fc, 0 0 10px #6200ea inset;
+      transition: transform 0.3s, box-shadow 0.3s;
+      overflow: hidden;
+    }
+
+    .btn:hover {
+      background: #bb86fc;
+      color: black;
+      transform: scale(1.1);
+      box-shadow: 0 0 30px #bb86fc;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(187, 134, 252, 0.5) 10%, transparent 10.01%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform 0.5s;
+      pointer-events: none;
+    }
+
+    .btn:active::after {
+      transform: translate(-50%, -50%) scale(2);
+      opacity: 0;
+    }
+
+    .ai-prediction {
+      font-size: 1.2em;
+      color: #b388ff;
+      text-shadow: 0 0 10px #b388ff;
+      margin: 20px 0;
+      overflow: hidden;
+      white-space: nowrap;
+      animation: typing 2s steps(40, end) forwards;
+      text-align: center;
+    }
+
+    /* User Management */
+    .user-management {
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .user-management h3, .prediction-controls h3 {
+      color: #bb86fc;
+      text-shadow: 0 0 10px #bb86fc;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .user-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .user-form input {
+      padding: 10px;
+      background: #2a2a3d;
+      border: 1px solid #a78bfa;
+      color: #c2aaff;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9em;
+      box-shadow: 0 0 10px #a78bfa inset;
+      flex: 1;
+      min-width: 150px;
+      box-sizing: border-box;
+    }
+
+    .user-form input:focus {
+      outline: none;
+      border-color: #bb86fc;
+      box-shadow: 0 0 15px #bb86fc;
+    }
+
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px auto;
+      background: rgba(100, 0, 255, 0.1);
+      border: 1px solid #a78bfa;
+    }
+
+    .user-table th, .user-table td {
+      padding: 10px;
+      color: #d1c4e9;
+      text-align: left;
+      border-bottom: 1px solid #a78bfa;
+    }
+
+    .user-table th {
+      color: #bb86fc;
+      text-shadow: 0 0 5px #bb86fc;
+      text-align: center;
+    }
+
+    .user-table td {
+      text-align: center;
+    }
+
+    /* Prediction Controls */
+    .prediction-controls {
+      width: 100%;
+    }
+
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #d1c4e9;
+      font-size: 0.9em;
+      margin: 10px 0;
+      justify-content: center;
+    }
+
+    .toggle-switch input {
+      appearance: none;
+      width: 40px;
+      height: 20px;
+      background: #2a2a3d;
+      border: 1px solid #a78bfa;
+      border-radius: 20px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .toggle-switch input::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #bb86fc;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: transform 0.3s;
+    }
+
+    .toggle-switch input:checked::before {
+      transform: translateX(20px);
+    }
+
+    .prediction-history {
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 15px auto;
+      background: rgba(100, 0, 255, 0.1);
+      border: 1px solid #a78bfa;
+      padding: 10px;
+      width: 100%;
+    }
+
+    .prediction-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .prediction-table th, .prediction-table td {
+      padding: 10px;
+      color: #d1c4e9;
+      text-align: center;
+      border-bottom: 1px solid #a78bfa;
+    }
+
+    .prediction-table th {
+      color: #bb86fc;
+      text-shadow: 0 0 5px #bb86fc;
+    }
+
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 20px #bb86fc; }
+      50% { text-shadow: 0 0 40px #bb86fc; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes letterPulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.9em;
+      color: #888;
+      animation: fadeIn 2s ease-in;
+    }
+
+    @media (max-width: 600px) {
+      .title { font-size: 2em; }
+      .clock { font-size: 1em; }
+      .btn { padding: 10px 20px; font-size: 0.9em; }
+      .ai-prediction { font-size: 1em; }
+      .admin-panel { padding: 15px; }
+      .user-form input { min-width: 120px; }
+      .user-table, .prediction-table { font-size: 0.8em; }
+      .prediction-history { max-height: 150px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div class="container">
+    <div class="title">
+      <span style="--i: 1">T</span><span style="--i: 2">R</span><span style="--i: 3">A</span><span style="--i: 4">D</span><span style="--i: 5">A</span><span style="--i: 6">R</span>
+      <span style="--i: 7"> </span>
+      <span style="--i: 8">M</span><span style="--i: 9">O</span><span style="--i: 10">D</span><span style="--i: 11">S</span>
+    </div>
+    <div class="clock" id="clock">--:--:--</div>
+
+    <div class="admin-panel">
+      <h2>Admin Dashboard</h2>
+      <div class="buttons">
+        <button class="btn" onclick="predict('SARVAR VIP')">SARVAR VIP</button>
+        <button class="btn" onclick="predict('PREMIUM SARVAR')">PREMIUM SARVAR</button>
+        <button class="btn" onclick="logout()">Logout</button>
+      </div>
+      <div class="ai-prediction" id="aiResult">AI is initializing...</div>
+
+      <div class="user-management">
+        <h3>User Management</h3>
+        <form class="user-form" id="userForm" onsubmit="addUser(event)">
+          <input type="text" id="newUsername" placeholder="New Username" required />
+          <input type="password" id="newPassword" placeholder="New Password" required />
+          <input type="date" id="expiryDate" required />
+          <button type="submit" class="btn">Add User</button>
+        </form>
+        <table class="user-table" id="userTable">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Password</th>
+              <th>Expiry Date</th>
+            </tr>
+          </thead>
+          <tbody id="userTableBody">
+            <tr><td colspan="3">No users added.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="prediction-controls">
+        <h3>Prediction Controls</h3>
+        <div class="toggle-switch">
+          <label for="sarvarVipToggle">SARVAR VIP Predictions</label>
+          <input type="checkbox" id="sarvarVipToggle" checked>
+        </div>
+        <div class="toggle-switch">
+          <label for="premiumSarvarToggle">PREMIUM SARVAR Predictions</label>
+          <input type="checkbox" id="premiumSarvarToggle" checked>
+        </div>
+        <div class="toggle-switch">
+          <label for="aiToggle">AI Predictions</label>
+          <input type="checkbox" id="aiToggle" checked>
+        </div>
+        <div class="prediction-history">
+          <table class="prediction-table" id="predictionTable">
+            <thead>
+              <tr>
+                <th>Prediction</th>
+                <th>Source</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="predictionTableBody">
+              <tr><td colspan="3">No predictions yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Powered by TRADAR MODS</div>
+
+  <script>
+    // Background particles
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 3 + 1,
+        speed: Math.random() * 0.5 + 0.2,
+        color: `hsl(${Math.random() * 60 + 260}, 70%, 60%)`,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+      });
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#bb86fc';
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
+        ctx.fill();
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx = -p.vx;
+        if (p.y < 0 || p.y > canvas.height) p.vy = -p.vy;
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 100) {
+            ctx.strokeStyle = `rgba(187, 134, 252, ${1 - dist / 100})`;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      drawParticles();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' });
+    }
+
+    // User Management
+    let users = [];
+    function addUser(event) {
+      event.preventDefault();
+      const username = document.getElementById('newUsername').value;
+      const password = document.getElementById('newPassword').value;
+      const expiryDate = document.getElementById('expiryDate').value;
+      users.push({ username, password, expiryDate });
+      updateUserTable();
+      document.getElementById('userForm').reset();
+    }
+
+    function updateUserTable() {
+      const userTableBody = document.getElementById('userTableBody');
+      userTableBody.innerHTML = users.length > 0
+        ? users.map(user => `
+            <tr>
+              <td>${user.username}</td>
+              <td>${user.password}</td>
+              <td>${user.expiryDate}</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="3">No users added.</td></tr>';
+    }
+
+    // Prediction Management
+    let predictionHistory = [];
+    function predict(source) {
+      const toggleId = source === 'SARVAR VIP' ? 'sarvarVipToggle' : 'premiumSarvarToggle';
+      if (!document.getElementById(toggleId).checked) {
+        const aiResult = document.getElementById('aiResult');
+        aiResult.style.animation = 'none';
+        void aiResult.offsetWidth;
+        aiResult.style.animation = 'typing 2s steps(40, end) forwards';
+        aiResult.textContent = `${source} Predictions are disabled (${new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })})`;
+        return;
+      }
+      const result = Math.random() < 0.5 ? 'BIG' : 'SMALL';
+      const timestamp = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' });
+      const prediction = { result, source, timestamp };
+      const aiResult = document.getElementById('aiResult');
+      aiResult.style.animation = 'none';
+      void aiResult.offsetWidth;
+      aiResult.style.animation = 'typing 2s steps(40, end) forwards';
+      aiResult.textContent = `Prediction: ${result} from ${source} (${timestamp})`;
+      predictionHistory.push(prediction);
+      updatePredictionTable();
+    }
+
+    function aiPredict() {
+      if (!document.getElementById('aiToggle').checked) return;
+      const result = Math.random() < 0.5 ? 'BIG' : 'SMALL';
+      const timestamp = new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' });
+      const prediction = { result, source: 'AI', timestamp };
+      const aiResult = document.getElementById('aiResult');
+      aiResult.style.animation = 'none';
+      void aiResult.offsetWidth;
+      aiResult.style.animation = 'typing 2s steps(40, end) forwards';
+      aiResult.textContent = `AI Prediction: ${result} (${timestamp})`;
+      predictionHistory.push(prediction);
+      updatePredictionTable();
+    }
+
+    function updatePredictionTable() {
+      const predictionTableBody = document.getElementById('predictionTableBody');
+      predictionTableBody.innerHTML = predictionHistory.length > 0
+        ? predictionHistory.map(p => `
+            <tr>
+              <td>${p.result}</td>
+              <td>${p.source}</td>
+              <td>${p.timestamp}</td>
+            </tr>
+          `).join('')
+        : '<tr><td colspan="3">No predictions yet.</td></tr>';
+      const historyDiv = document.getElementById('predictionTable').parentElement;
+      historyDiv.scrollTop = historyDiv.scrollHeight;
+    }
+
+    function logout() {
+      window.location.href = 'index.html';
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    aiPredict();
+    const now = new Date();
+    const delay = (60 - now.getSeconds()) * 1000;
+    setTimeout(() => {
+      aiPredict();
+      setInterval(aiPredict, 60000);
+    }, delay);
+  </script>
+</body>
+</html>

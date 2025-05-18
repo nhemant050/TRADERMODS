@@ -1,0 +1,281 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TRADAR MODS - Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at bottom, #0d0d1a 0%, #000000 100%);
+      font-family: 'Orbitron', monospace;
+      color: #c2aaff;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .title {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #bb86fc;
+      text-shadow: 0 0 20px #bb86fc, 0 0 40px #6200ea;
+      animation: glow 2s infinite ease-in-out, slideIn 1s ease-out;
+      display: flex;
+      justify-content: center;
+    }
+
+    .title span {
+      display: inline-block;
+      animation: letterPulse 1.5s infinite ease-in-out;
+      animation-delay: calc(var(--i) * 0.1s);
+    }
+
+    .login-form {
+      background: #1e1e2f;
+      padding: 30px;
+      border: 2px solid #bb86fc;
+      box-shadow: 0 0 30px #bb86fc;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      animation: slideIn 0.5s ease-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .login-form h2 {
+      color: #bb86fc;
+      text-shadow: 0 0 10px #bb86fc;
+      margin-bottom: 20px;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      background: #2a2a3d;
+      border: 1px solid #a78bfa;
+      color: #c2aaff;
+      font-family: 'Orbitron', monospace;
+      font-size: 1em;
+      box-shadow: 0 0 10px #a78bfa inset;
+      box-sizing: border-box;
+    }
+
+    .login-form input:focus {
+      outline: none;
+      border-color: #bb86fc;
+      box-shadow: 0 0 15px #bb86fc;
+    }
+
+    .btn {
+      position: relative;
+      background: #1e1e2f;
+      color: #bb86fc;
+      border: 2px solid #bb86fc;
+      padding: 15px 30px;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 20px #bb86fc, 0 0 10px #6200ea inset;
+      transition: transform 0.3s, box-shadow 0.3s;
+      overflow: hidden;
+      width: 100%;
+      max-width: 200px;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background: #bb86fc;
+      color: black;
+      transform: scale(1.05);
+      box-shadow: 0 0 30px #bb86fc;
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(187, 134, 252, 0.5) 10%, transparent 10.01%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform 0.5s;
+      pointer-events: none;
+    }
+
+    .btn:active::after {
+      transform: translate(-50%, -50%) scale(2);
+      opacity: 0;
+    }
+
+    .error-message {
+      font-size: 1em;
+      color: #ff5555;
+      text-shadow: 0 0 10px #ff5555;
+      margin-top: 10px;
+      display: none;
+      animation: typing 1s steps(40, end) forwards;
+      text-align: center;
+    }
+
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 20px #bb86fc; }
+      50% { text-shadow: 0 0 40px #bb86fc; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes letterPulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 10px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.9em;
+      color: #888;
+      animation: slideIn 2s ease-in;
+    }
+
+    @media (max-width: 600px) {
+      .title { font-size: 2em; }
+      .login-form { padding: 20px; }
+      .btn { padding: 10px 20px; font-size: 0.9em; }
+      .error-message { font-size: 0.8em; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div class="container">
+    <div class="title">
+      <span style="--i: 1">T</span><span style="--i: 2">R</span><span style="--i: 3">A</span><span style="--i: 4">D</span><span style="--i: 5">A</span><span style="--i: 6">R</span>
+      <span style="--i: 7"> </span>
+      <span style="--i: 8">M</span><span style="--i: 9">O</span><span style="--i: 10">D</span><span style="--i: 11">S</span>
+    </div>
+    <div class="login-form">
+      <h2>Login to TRADAR MODS</h2>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit" class="btn">Login</button>
+      </form>
+      <div class="error-message" id="errorMessage">Invalid credentials. Please try again.</div>
+    </div>
+  </div>
+  <div class="footer">Powered by TRADAR MODS</div>
+
+  <script>
+    // Background particles
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const particles = [];
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 3 + 1,
+        speed: Math.random() * 0.5 + 0.2,
+        color: `hsl(${Math.random() * 60 + 260}, 70%, 60%)`,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+      });
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = '#bb86fc';
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
+        ctx.fill();
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0 || p.x > canvas.width) p.vx = -p.vx;
+        if (p.y < 0 || p.y > canvas.height) p.vy = -p.vy;
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 100) {
+            ctx.strokeStyle = `rgba(187, 134, 252, ${1 - dist / 100})`;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    function animate() {
+      drawParticles();
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Login handling
+    function handleLogin(event) {
+      event.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Simulated authentication
+      if (username === 'admin' && password === 'password123') {
+        errorMessage.style.display = 'none';
+        window.location.href = 'admin.html';
+      } else {
+        errorMessage.style.display = 'block';
+        document.getElementById('loginForm').reset();
+      }
+    }
+  </script>
+</body>
+</html>
